@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>WebInjection. Level 1</title>
+    </head>
+    <body>
+        <script>
+            const onbuttonclick = () => {
+                const product_name = document.getElementById('product_name').value;
+                const endpoint = '/product_info?product_name=' + product_name;
+                window.location.replace(endpoint)
+            }
+        </script>
+        <form>
+            Product name: <input id="product_name" type="text">
+            <button type="submit" value="Search" onclick="onbuttonclick()">Search</button>
+        </form>        
+    </body>
+</html>

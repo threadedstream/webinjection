@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Product Info</title>
+    </head>
+    <body>
+        <div>
+            {{ range $index, $product := .Products }}
+                <h2> {{ $product.Name }} </h2>
+                <pre> {{ $product.Description }} </pre>
+            {{ else }}
+                <h2> No product with such name exists </h2>
+            {{ end }}
+        </div>
+    </body>
+</html>
