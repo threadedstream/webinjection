@@ -30,3 +30,19 @@ func FetchProducts(_ http.ResponseWriter, request *http.Request) ([]*database.Pr
 	}
 	return products, err
 }
+
+func Login(request *http.Request) (bool, error) {
+	username := request.FormValue("username")
+	password := request.FormValue("password")
+	if username == "" && password == "" {
+		return false, errors.New("username and password must be present")
+	}
+	users, err := conn.QueryUserProtected(context.Background(), username, password)
+	if err != nil {
+		return false, err
+	}
+	if users == nil {
+		return false, nil
+	}
+	return true, nil
+}

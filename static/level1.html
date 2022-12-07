@@ -4,16 +4,33 @@
         <title>WebInjection. Level 1</title>
     </head>
     <body>
-        <script>
-            const onbuttonclick = () => {
-                const product_name = document.getElementById('product_name').value;
-                const endpoint = '/product_info?product_name=' + product_name;
-                window.location.replace(endpoint)
-            }
-        </script>
         <form>
             Product name: <input id="product_name" type="text">
             <button type="submit" value="Search" onclick="onbuttonclick()">Search</button>
-        </form>        
+        </form>
+        <div style="visibility: hidden" id="product_block">
+            {{ range $index, $product := .Products }}
+                <h2> {{ $product.Name }} </h2>
+                <pre> {{ $product.Description }} </pre>
+            {{ else }}
+                <h2> No product with such name exists </h2>
+            {{ end }}
+        </div>
+        <script>
+            const onbuttonclick = () => {
+                const product_name = document.getElementById('product_name').value;
+                const endpoint = '/level1?product_name=' + product_name;
+                window.location.replace(endpoint)
+            }
+
+            const queryString = window.location.search;
+            if (queryString) {
+                const urlParams = new URLSearchParams(queryString);
+                const message = urlParams.get('product_name');
+                if (message) {
+                    document.getElementById('product_name').style.visibility = "visible";
+                }
+            }
+        </script>
     </body>
 </html>

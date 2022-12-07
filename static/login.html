@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Login</title>
+    </head>
+    <body>
+        <form action="/login" method="POST">
+            Username: <input type="text" name="username">
+            Password: <input type="password" name="password">
+            <input type="submit" value="Login!">
+            <div style="visibility: hidden; margin-top: 2%" role="alert" id="message"></h2>
+        </form>
+        <script>
+            const queryString = window.location.search;
+            console.log(document.getElementById("message"));
+            if (queryString) {
+                const urlParams = new URLSearchParams(queryString);
+                const message = urlParams.get('message');
+                if (message) {
+                    document.getElementById("message").innerHTML = message;
+                    document.getElementById("message").style.visibility = "visible";
+                }
+            }
+        </script>
+    </body>
+</html>

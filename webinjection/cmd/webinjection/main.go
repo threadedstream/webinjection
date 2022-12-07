@@ -110,6 +110,26 @@ func setupHandlers() (mux *http.ServeMux) {
 		}
 		writer.Write(renderProductInfo(products))
 	})
+	mux.HandleFunc("/login", func(writer http.ResponseWriter, request *http.Request) {
+		if request.Method == "GET" {
+			writer.Write(renderStatic("login.html"))
+		} else if request.Method == "POST" {
+			canBeLoggedIn, err := api.Login(request)
+			if err != nil {
+				log.Println(err.Error())
+				writer.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			if canBeLoggedIn {
+				http.Redirect(writer, request, "/home", http.StatusMovedPermanently)
+				return
+			}
+			http.Redirect(writer, request, "/login?message=Authentication failed", http.StatusMovedPermanently)
+		} else {
+			writer.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+	})
 	mux.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
 		writer.Write(renderStatic("not_found.html"))
 	})
@@ -153,7 +173,6 @@ func runHTTPServer(ctx context.Context) {
 }
 
 func main() {
-
 	ctx := context.Background()
 	runHTTPServer(ctx)
 }
