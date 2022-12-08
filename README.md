@@ -1,6 +1,6 @@
 # webinjection
 
-DVWA clone that's got a whole slew of sql injection vulnerabilities. 
+DVWA clone that's got a whole slew of vulnerabilities. 
 I plan to represent it as a collection of levels 
 
 ## TODO 
