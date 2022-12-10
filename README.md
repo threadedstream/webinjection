@@ -4,10 +4,10 @@ DVWA clone that's got a whole slew of vulnerabilities.
 I plan to represent it as a collection of levels 
 
 ## TODO 
-- Add docker-compose.yml 
-- Make index page look more beautiful and descriptive
-- Add XSS level 
-- Write frontend separately? 
+- [x] Add docker-compose.yml 
+- [ ] Make index page look more beautiful and descriptive
+- [ ] Add XSS level 
+- [ ] Write frontend separately? 
 
 
 ## How to run 
