@@ -7,7 +7,7 @@ I plan to represent it as a collection of levels
 - [x] Add docker-compose.yml 
 - [ ] Make index page look more beautiful and descriptive
 - [ ] Add XSS level 
-- [ ] Write frontend separately? 
+- [ ] Write frontend separately? (Vue? React?) 
 
 
 ## How to run 
