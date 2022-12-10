@@ -11,6 +11,13 @@ I plan to represent it as a collection of levels
 design levels 
 
 
+## How to run 
+Run the following commands
+```
+  docker-compose build 
+  docker-compose up 
+```
+
 ## Dependencies 
 Here is a list of **prerequisites** you need to have in order to use webinjection app
 
