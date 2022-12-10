@@ -1,14 +1,12 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	_ "embed"
+	"flag"
 	"fmt"
 	"github.com/threadedstream/webinjection/webinjection/api"
-	"github.com/threadedstream/webinjection/webinjection/database"
-	"html/template"
-	"io"
+	"github.com/threadedstream/webinjection/webinjection/renderer"
 	"log"
 	"net/http"
 	"os"
@@ -18,88 +16,20 @@ import (
 )
 
 var (
-	projectRoot string
-	doOnce      sync.Once
+	doOnce sync.Once
 )
 
-func init() {
-	wd, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
-	projectRoot = wd
-}
-
-func newTemplate(path, name string) (tmpl *template.Template, err error) {
-	f, err := os.OpenFile(path, os.O_RDONLY, os.ModePerm)
-	if err != nil {
-		return nil, err
-	}
-	contents, err := io.ReadAll(f)
-	if err != nil {
-		return nil, err
-	}
-	tmpl, err = template.New(name).Parse(string(contents))
-	return tmpl, err
-}
-
-func renderIndex() []byte {
-	w := bytes.NewBuffer(nil)
-	x := struct {
-		Message string
-	}{
-		Message: "SQL Injection is no jokes",
-	}
-
-	t, err := newTemplate(fmt.Sprintf("%s/static/%s", projectRoot, "index.html"), "index.html")
-	if err != nil {
-		panic(err)
-	}
-	err = t.Execute(w, x)
-	if err != nil {
-		panic(err)
-	}
-	return w.Bytes()
-}
-
-func renderProductInfo(products []*database.Product) []byte {
-	w := bytes.NewBuffer(nil)
-	x := struct {
-		Products []*database.Product
-	}{
-		Products: products,
-	}
-
-	t, err := newTemplate(fmt.Sprintf("%s/static/%s", projectRoot, "product_info.html"), "product_info.html")
-	if err != nil {
-		panic(err)
-	}
-	err = t.Execute(w, x)
-	if err != nil {
-		panic(err)
-	}
-	return w.Bytes()
-}
-
-func renderStatic(name string) []byte {
-	f, err := os.OpenFile(fmt.Sprintf("%s/static/%s", projectRoot, name), os.O_RDONLY, os.ModePerm)
-	if err != nil {
-		panic(err)
-	}
-	bs, err := io.ReadAll(f)
-	if err != nil {
-		panic(err)
-	}
-	return bs
-}
+var (
+	addr = flag.String("addr", "0.0.0.0:8000", "address to bind server to")
+)
 
 func setupHandlers() (mux *http.ServeMux) {
 	mux = http.NewServeMux()
 	mux.HandleFunc("/home", func(writer http.ResponseWriter, request *http.Request) {
-		writer.Write(renderIndex())
+		writer.Write(renderer.RenderIndex())
 	})
 	mux.HandleFunc("/level1", func(writer http.ResponseWriter, request *http.Request) {
-		writer.Write(renderStatic("level1.html"))
+		writer.Write(renderer.RenderStatic("level1.html"))
 	})
 	mux.HandleFunc("/product_info", func(writer http.ResponseWriter, request *http.Request) {
 		products, err := api.FetchProducts(writer, request)
@@ -108,11 +38,11 @@ func setupHandlers() (mux *http.ServeMux) {
 			writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		writer.Write(renderProductInfo(products))
+		writer.Write(renderer.RenderProductInfo(products))
 	})
 	mux.HandleFunc("/login", func(writer http.ResponseWriter, request *http.Request) {
 		if request.Method == "GET" {
-			writer.Write(renderStatic("login.html"))
+			writer.Write(renderer.RenderStatic("login.html"))
 		} else if request.Method == "POST" {
 			canBeLoggedIn, err := api.Login(request)
 			if err != nil {
@@ -131,7 +61,7 @@ func setupHandlers() (mux *http.ServeMux) {
 		}
 	})
 	mux.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-		writer.Write(renderStatic("not_found.html"))
+		writer.Write(renderer.RenderStatic("not_found.html"))
 	})
 	return mux
 }
@@ -139,7 +69,7 @@ func setupHandlers() (mux *http.ServeMux) {
 func runHTTPServer(ctx context.Context) {
 	doOnce.Do(func() {
 		mux := setupHandlers()
-		s := &http.Server{Addr: "0.0.0.0:8000", Handler: mux}
+		s := &http.Server{Addr: *addr, Handler: mux}
 
 		notifier := make(chan os.Signal, 1)
 		signal.Notify(notifier, syscall.SIGKILL, syscall.SIGTERM, syscall.SIGINT)
@@ -166,6 +96,7 @@ func runHTTPServer(ctx context.Context) {
 			}
 		}()
 
+		log.Println("Running server on ", *addr)
 		if err := s.ListenAndServe(); err != nil {
 			panic(err)
 		}
@@ -174,5 +105,6 @@ func runHTTPServer(ctx context.Context) {
 
 func main() {
 	ctx := context.Background()
+	flag.Parse()
 	runHTTPServer(ctx)
 }

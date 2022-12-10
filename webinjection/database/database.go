@@ -27,7 +27,7 @@ type User struct {
 func getConnString() string {
 	connString := os.Getenv("DATABASE_URL")
 	if connString == "" {
-		connString = "user=postgres dbname=postgres sslmode=disable"
+		connString = "host=postgres-db user=postgres dbname=postgres sslmode=disable"
 	}
 	return connString
 }
@@ -62,27 +62,11 @@ func (c *Conn) QueryUser(ctx context.Context, username, password string) ([]*Use
 }
 
 func (c *Conn) QueryUserProtected(ctx context.Context, username, password string) ([]*User, error) {
-	// TODO(threadedstream): try php instead?
 	users := []*User{}
-	pass := addSlashes(password)
-	user := addSlashes(username)
-	query := fmt.Sprintf("SELECT * FROM users WHERE username = '%s' AND password = '%s'", user, pass)
-	err := c.SelectContext(ctx, &users, query)
+	query := fmt.Sprintf("SELECT * FROM users WHERE username = $1 AND password = '%s'", password)
+	err := c.SelectContext(ctx, &users, query, username)
 	if len(users) == 0 {
 		return nil, nil
 	}
 	return users, err
-}
-
-func addSlashes(s string) string {
-	var out []rune
-	for _, c := range s {
-		if c == '\'' || c == '"' || c == '\\' || c == '0' {
-			out = append(out, '\\')
-			out = append(out, c)
-		} else {
-			out = append(out, c)
-		}
-	}
-	return string(out)
 }
