@@ -3,7 +3,7 @@ package renderer
 import (
 	"bytes"
 	"fmt"
-	"github.com/threadedstream/webinjection/webinjection/database"
+	"github.com/threadedstream/webinjection/backend/database/models"
 	"html/template"
 	"io"
 	"os"
@@ -35,7 +35,7 @@ func newTemplate(path, name string) (tmpl *template.Template, err error) {
 	return tmpl, err
 }
 
-func RenderIndex() []byte {
+func RenderHomePage() []byte {
 	w := bytes.NewBuffer(nil)
 	x := struct {
 		Message string
@@ -54,10 +54,10 @@ func RenderIndex() []byte {
 	return w.Bytes()
 }
 
-func RenderProductInfo(products []*database.Product) []byte {
+func RenderProductInfo(products []*models.Product) []byte {
 	w := bytes.NewBuffer(nil)
 	x := struct {
-		Products []*database.Product
+		Products []*models.Product
 	}{
 		Products: products,
 	}

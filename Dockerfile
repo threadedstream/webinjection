@@ -8,7 +8,7 @@ RUN go mod download && go mod verify
 
 COPY . .
 
-RUN go build webinjection/cmd/webinjection/main.go
+RUN go build backend/cmd/backend/main.go
 
 RUN go install github.com/pressly/goose/v3/cmd/goose@latest
 

@@ -5,23 +5,12 @@ import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"github.com/threadedstream/webinjection/backend/database/models"
 	"os"
 )
 
 type Conn struct {
 	*sqlx.DB
-}
-
-type Product struct {
-	ID          int    `db:"id"`
-	Name        string `db:"name"`
-	Description string `db:"description"`
-}
-
-type User struct {
-	ID       int    `db:"id"`
-	Username string `db:"username"`
-	Password string `db:"password"`
 }
 
 func getConnString() string {
@@ -42,8 +31,8 @@ func CreateConnection(ctx context.Context) (*Conn, error) {
 	}, nil
 }
 
-func (c *Conn) QueryProducts(ctx context.Context, name string) ([]*Product, error) {
-	products := []*Product{}
+func (c *Conn) QueryProducts(ctx context.Context, name string) ([]*models.Product, error) {
+	products := []*models.Product{}
 	err := c.SelectContext(ctx, &products, fmt.Sprintf("SELECT * FROM products WHERE name = '%s';", name))
 	if len(products) == 0 {
 		return nil, nil
@@ -51,8 +40,8 @@ func (c *Conn) QueryProducts(ctx context.Context, name string) ([]*Product, erro
 	return products, err
 }
 
-func (c *Conn) QueryUser(ctx context.Context, username, password string) ([]*User, error) {
-	users := []*User{}
+func (c *Conn) QueryUser(ctx context.Context, username, password string) ([]*models.User, error) {
+	users := []*models.User{}
 	query := fmt.Sprintf("SELECT * FROM users WHERE username = $1 AND password = '%s'", password)
 	err := c.SelectContext(ctx, &users, query, username)
 	if len(users) == 0 {
@@ -61,12 +50,19 @@ func (c *Conn) QueryUser(ctx context.Context, username, password string) ([]*Use
 	return users, err
 }
 
-func (c *Conn) QueryUserProtected(ctx context.Context, username, password string) ([]*User, error) {
-	users := []*User{}
+func (c *Conn) QueryUserProtected(ctx context.Context, username, password string) ([]*models.User, error) {
+	users := []*models.User{}
 	query := fmt.Sprintf("SELECT * FROM users WHERE username = $1 AND password = '%s'", password)
 	err := c.SelectContext(ctx, &users, query, username)
 	if len(users) == 0 {
 		return nil, nil
 	}
 	return users, err
+}
+
+func (c *Conn) GetAllProducts(ctx context.Context) ([]*models.Product, error) {
+	products := []*models.Product{}
+	query := "SELECT * FROM products"
+	err := c.SelectContext(ctx, &products, query)
+	return products, err
 }

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>WebInjection. Level 1</title>
+        <title>WebInjection. sqli_1</title>
     </head>
     <body>
         <form>
@@ -19,7 +19,7 @@
         <script>
             const onbuttonclick = () => {
                 const product_name = document.getElementById('product_name').value;
-                const endpoint = '/level1?product_name=' + product_name;
+                const endpoint = '/sqli_1?product_name=' + product_name;
                 window.location.replace(endpoint)
             }
 

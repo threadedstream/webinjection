@@ -3,7 +3,8 @@ package api
 import (
 	"context"
 	"errors"
-	"github.com/threadedstream/webinjection/webinjection/database"
+	"github.com/threadedstream/webinjection/backend/database"
+	"github.com/threadedstream/webinjection/backend/database/models"
 	"net/http"
 )
 
@@ -19,7 +20,11 @@ func init() {
 	}
 }
 
-func FetchProducts(_ http.ResponseWriter, request *http.Request) ([]*database.Product, error) {
+func GetAllProducts(ctx context.Context) ([]*models.Product, error) {
+	return conn.GetAllProducts(ctx)
+}
+
+func FetchProducts(_ http.ResponseWriter, request *http.Request) ([]*models.Product, error) {
 	if request.Method != http.MethodGet {
 		return nil, errors.New("invalid method used")
 	}

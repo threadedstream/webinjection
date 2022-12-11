@@ -1,12 +1,14 @@
 package main
 
 import (
+	"encoding/json"
+	"github.com/threadedstream/webinjection/backend/api"
+	"github.com/threadedstream/webinjection/backend/renderer"
+
 	"context"
 	_ "embed"
 	"flag"
 	"fmt"
-	"github.com/threadedstream/webinjection/webinjection/api"
-	"github.com/threadedstream/webinjection/webinjection/renderer"
 	"log"
 	"net/http"
 	"os"
@@ -26,10 +28,10 @@ var (
 func setupHandlers() (mux *http.ServeMux) {
 	mux = http.NewServeMux()
 	mux.HandleFunc("/home", func(writer http.ResponseWriter, request *http.Request) {
-		writer.Write(renderer.RenderIndex())
+		writer.Write(renderer.RenderHomePage())
 	})
-	mux.HandleFunc("/level1", func(writer http.ResponseWriter, request *http.Request) {
-		writer.Write(renderer.RenderStatic("level1.html"))
+	mux.HandleFunc("/sqli_1", func(writer http.ResponseWriter, request *http.Request) {
+		writer.Write(renderer.RenderStatic("sqli_1/index.html"))
 	})
 	mux.HandleFunc("/product_info", func(writer http.ResponseWriter, request *http.Request) {
 		products, err := api.FetchProducts(writer, request)
@@ -40,9 +42,9 @@ func setupHandlers() (mux *http.ServeMux) {
 		}
 		writer.Write(renderer.RenderProductInfo(products))
 	})
-	mux.HandleFunc("/login", func(writer http.ResponseWriter, request *http.Request) {
+	mux.HandleFunc("/sqli_2", func(writer http.ResponseWriter, request *http.Request) {
 		if request.Method == "GET" {
-			writer.Write(renderer.RenderStatic("login.html"))
+			writer.Write(renderer.RenderStatic("index.html"))
 		} else if request.Method == "POST" {
 			canBeLoggedIn, err := api.Login(request)
 			if err != nil {
@@ -59,6 +61,22 @@ func setupHandlers() (mux *http.ServeMux) {
 			writer.WriteHeader(http.StatusMethodNotAllowed)
 			return
 		}
+	})
+
+	mux.HandleFunc("/api/v1/products", func(writer http.ResponseWriter, request *http.Request) {
+		products, err := api.GetAllProducts(context.Background())
+		if err != nil {
+			log.Println(err.Error())
+			writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		bs, err := json.Marshal(products)
+		if err != nil {
+			log.Println(err.Error())
+			writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		writer.Write(bs)
 	})
 	mux.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
 		writer.Write(renderer.RenderStatic("not_found.html"))
