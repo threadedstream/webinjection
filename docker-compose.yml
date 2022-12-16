@@ -15,12 +15,14 @@ services:
       container_name: postgres-db
       image: postgres
       ports:
-        - 5432:5432
+        - target: 5432
+          protocol: tcp
+          mode: bridge
       environment:
         POSTGRES_HOST_AUTH_METHOD: trust
         PGDATA: /data/postgres
       volumes:
-        - postgres:/data/postgres
+        - postgres-vol:/data/postgres
       networks:
         - web-net
       restart: unless-stopped
@@ -30,4 +32,4 @@ networks:
     driver: bridge
 
 volumes:
-  postgres:
+  postgres-vol:

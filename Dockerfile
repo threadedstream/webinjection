@@ -8,9 +8,9 @@ RUN go mod download && go mod verify
 
 COPY . .
 
-RUN go build backend/cmd/backend/main.go
+RUN go build backend/cmd/backend/main.go && \
+    go install github.com/pressly/goose/v3/cmd/goose@latest
 
-RUN go install github.com/pressly/goose/v3/cmd/goose@latest
+COPY entrypoint.sh .
 
-
-CMD ["./main"]
+CMD ["bash", "entrypoint.sh"]
